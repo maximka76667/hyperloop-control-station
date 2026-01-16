@@ -1,0 +1,31 @@
+log
+trace.json
+
+# Windows build
+*.exe
+# Linux build
+Backend-H8
+backend
+!build
+# MacOS build
+cmd/cmd
+cmd/logger/
+
+# EXCEL
+*.xlsx
+
+static
+
+.vscode
+
+downloads
+
+audience_static
+
+cmd/adj/
+cmd/config.toml
+
+
+# Test data
+c.out
+cover.out
