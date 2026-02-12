@@ -1,10 +1,8 @@
 package tcp
 
 import (
-	"errors"
 	"fmt"
 	"net"
-	"syscall"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -35,47 +33,41 @@ func NewClient(address string, config ClientConfig, baseLogger zerolog.Logger) C
 
 // Dial attempts to connect with the client
 func (client *Client) Dial() (net.Conn, error) {
-
-	var err error
-	var conn net.Conn
 	client.logger.Info().Msg("dialing")
 
-	for client.config.MaxConnectionRetries <= 0 || client.currentRetries < client.config.MaxConnectionRetries {
-		// Increment retry counter and calculate backoff
-		client.currentRetries++
+	for {
+		// Attempt the connection immediately
+		conn, err := client.config.DialContext(client.config.Context, "tcp", client.address)
 
-		backoffDuration := client.config.ConnectionBackoffFunction(client.currentRetries)
-		client.logger.Error().Stack().Err(err).Dur("backoff", backoffDuration).Int("retry", client.currentRetries).Msg("retrying after backoff")
-
-		// Sleep for backoff duration
-		time.Sleep(backoffDuration)
-
-		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
-
+		// Connection successful
 		if err == nil {
 			client.logger.Info().Msg("connected")
 			client.currentRetries = 0
 			return conn, nil
 		}
 
-		// Check if context was cancelled
+		// Check if we should even bother retrying
 		if client.config.Context.Err() != nil {
-			client.logger.Error().Stack().Err(client.config.Context.Err()).Msg("canceled")
 			return nil, client.config.Context.Err()
 		}
 
-		// Check if we should retry this error
-		if netErr, ok := err.(net.Error); !client.config.TryReconnect || (!errors.Is(err, syscall.ECONNREFUSED) && (!ok || !netErr.Timeout())) {
-			client.logger.Error().Stack().Err(err).Msg("failed with non-retryable error")
-			return nil, err
-		}
-	}
+		client.currentRetries++
 
-	client.logger.Debug().Int("max", client.config.MaxConnectionRetries).Msg("max connection retries exceeded")
-	return nil, ErrTooManyRetries{
-		Max:     client.config.MaxConnectionRetries,
-		Network: "tcp",
-		Remote:  client.address,
+		// Check if we hit the limit, maximum connection retries exceeded
+		if client.config.MaxConnectionRetries > 0 && client.currentRetries >= client.config.MaxConnectionRetries {
+			client.logger.Debug().Int("max", client.config.MaxConnectionRetries).Msg("max connection retries exceeded")
+			return nil, ErrTooManyRetries{
+				Max:     client.config.MaxConnectionRetries,
+				Network: "tcp",
+				Remote:  client.address,
+			}
+		}
+
+		// Backoff and Sleep ONLY AFTER a failure
+		backoffDuration := client.config.ConnectionBackoffFunction(client.currentRetries)
+		client.logger.Error().Err(err).Dur("backoff", backoffDuration).Int("retry", client.currentRetries).Msg("retrying after backoff")
+
+		time.Sleep(backoffDuration)
 	}
 }
 

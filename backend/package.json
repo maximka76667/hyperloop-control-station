@@ -8,6 +8,8 @@
     "dev": "go run ./cmd --config ./cmd/dev-config.toml",
     "dev:main": "go run ./cmd --config ./cmd/config.toml",
     "build": "go build -o bin/backend ./cmd",
-    "test": "go test ./..."
+    "build:ci": "go build",
+    "test": "node test.js",
+    "test:sum": "gotestsum --format pkgname-and-test-fails -- -v -count=1 -timeout=20s ./..."
   }
 }
