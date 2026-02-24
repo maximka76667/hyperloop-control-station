@@ -2,10 +2,11 @@ package tests_functions
 
 import (
 	"fmt"
-	ws "github.com/gorilla/websocket"
-	"github.com/rs/zerolog"
 	"net/http"
 	"net/url"
+
+	ws "github.com/gorilla/websocket"
+	"github.com/rs/zerolog"
 )
 
 func StartServer(logger zerolog.Logger, name string) url.URL {

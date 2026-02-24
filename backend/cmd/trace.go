@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/diode"
 	trace "github.com/rs/zerolog/log"
 	"github.com/rs/zerolog/pkgerrors"
 )
@@ -35,7 +36,7 @@ var traceLevelMap = map[string]zerolog.Level{
 //
 // Returns the opened *os.File for the trace file so the caller can close it later,
 // or nil if an error occurred while creating the file or if the level is invalid.
-func initTrace(traceLevel string, traceFile string) *os.File {
+func initTrace(traceLevel string, traceFile string) *traceCloser {
 
 	// If trace file is undefined  use user settings
 
@@ -79,8 +80,16 @@ func initTrace(traceLevel string, traceFile string) *os.File {
 	// Write logs to both the console and the file.
 	multi := zerolog.MultiLevelWriter(consoleWriter, file)
 
+	// Diode asyncronous writer
+	asyncWriter := diode.NewWriter(multi, 1000, 10*time.Millisecond, func(dropped int) {
+		fmt.Printf("Logger dropped %d messages\n", dropped)
+	})
+
+	// Custom struct to close the file and the async writer
+	traceCloser := traceCloser{file: file, asyncWriter: asyncWriter}
+
 	// Create a new logger that includes timestamps and caller information.
-	trace.Logger = zerolog.New(multi).With().Timestamp().Caller().Logger()
+	trace.Logger = zerolog.New(asyncWriter).Hook(traceExitHandler{closer: asyncWriter}).With().Timestamp().Caller().Logger()
 
 	// Validate and set the chosen log level.
 	if level, ok := traceLevelMap[traceLevel]; ok {
@@ -88,9 +97,8 @@ func initTrace(traceLevel string, traceFile string) *os.File {
 	} else {
 		// If the provided level is invalid, log a fatal message, close the file and return nil.
 		trace.Fatal().Msg("invalid log level selected")
-		file.Close()
 		return nil
 	}
 
-	return file
+	return &traceCloser
 }

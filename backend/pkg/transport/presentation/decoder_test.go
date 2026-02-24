@@ -16,6 +16,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/rs/zerolog"
+	trace "github.com/rs/zerolog/log"
 )
 
 func TestDecoder(t *testing.T) {
@@ -797,6 +798,7 @@ func toBinary(n any, order binary.ByteOrder) []byte {
 			return []byte{0x00}
 		}
 	default:
-		panic("must be a number or boolean")
+		trace.Panic().Msg("must be a number or boolean")
+		return nil
 	}
 }

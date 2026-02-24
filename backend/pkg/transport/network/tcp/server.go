@@ -21,7 +21,7 @@ type Server struct {
 
 // NewServer inits a new ServerConfig with good defaults and the provided values
 func NewServer(address string, config ServerConfig, baseLogger zerolog.Logger) Server {
-	logger := baseLogger.With().Str("localAddres", address).Logger()
+	logger := baseLogger.With().Str("localAddress", address).Logger()
 	return Server{
 		config:  config,
 		address: address,

@@ -2,15 +2,16 @@ package connection_test
 
 import (
 	"encoding/json"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	data "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/tests_functions"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"os"
-	"testing"
-	"time"
 )
 
 func TestConnectionTopic_Push(t *testing.T) {

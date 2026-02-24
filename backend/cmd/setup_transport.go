@@ -72,7 +72,7 @@ func configureTCPClientTransport(
 		}
 		backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpClient]+uint16(i)))
 		if err != nil {
-			panic("Failed to resolve local backend TCP client address")
+			trace.Panic().Msg("Failed to resolve local backend TCP client address")
 		}
 		// Create TCP client config with custom parameters from config
 		clientConfig := tcp.NewClientConfig(backendTcpClientAddr)
@@ -138,7 +138,7 @@ func configureUDPServerTransport(
 	udpServer := udp.NewServer(adj.Info.Addresses[BACKEND], adj.Info.Ports[UDP], &trace.Logger)
 	err := udpServer.Start()
 	if err != nil {
-		panic("failed to start UDP server: " + err.Error())
+		trace.Panic().Msg("failed to start UDP server: " + err.Error())
 	}
 	go transp.HandleUDPServer(udpServer)
 }
@@ -184,7 +184,7 @@ func getTransportDecEnc(info adj_module.Info, podData pod_data.PodData) (*presen
 					case "float64":
 						descriptor[i] = data.NewNumericDescriptor[float64](data.ValueName(meas.Id), podOps, displayOps)
 					default:
-						panic(fmt.Sprintf("unexpected numeric type for %s: %s", meas.Id, meas.Type))
+						trace.Panic().Msg(fmt.Sprintf("unexpected numeric type for %s: %s", meas.Id, meas.Type))
 					}
 				case pod_data.BooleanMeasurement:
 					descriptor[i] = data.NewBooleanDescriptor(data.ValueName(meas.Id))
@@ -195,7 +195,8 @@ func getTransportDecEnc(info adj_module.Info, podData pod_data.PodData) (*presen
 					}
 					descriptor[i] = data.NewEnumDescriptor(data.ValueName(meas.Id), enumDescriptor)
 				default:
-					panic(fmt.Sprintf("unexpected measurement type: %T", measurement))
+					trace.Panic().Msg(fmt.Sprintf("unexpected measurement type: %T", measurement))
+					return nil, nil
 				}
 			}
 			dataDecoder.SetDescriptor(abstraction.PacketId(packet.Id), descriptor)

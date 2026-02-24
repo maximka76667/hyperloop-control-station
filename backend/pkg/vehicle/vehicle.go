@@ -33,7 +33,8 @@ type Vehicle struct {
 	ipToBoardId   map[string]abstraction.BoardId
 	BlcuId        abstraction.BoardId
 
-	trace zerolog.Logger
+	notifiedUnexpectedIds map[abstraction.PacketId]struct{}
+	trace                 zerolog.Logger
 }
 
 // UserPush is the method invoked by boards to signal the user has sent information to the back

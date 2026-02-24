@@ -21,7 +21,7 @@ type Client struct {
 
 // NewClient inits a ClientConfig with good defaults and the provided information
 func NewClient(address string, config ClientConfig, baseLogger zerolog.Logger) Client {
-	logger := baseLogger.With().Str("localAddres", config.LocalAddr.String()).Str("remoteAddress", address).Logger()
+	logger := baseLogger.With().Str("localAddress", config.LocalAddr.String()).Str("remoteAddress", address).Logger()
 	return Client{
 		config: config,
 

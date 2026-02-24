@@ -10,6 +10,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	loggerHandler "github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	trace "github.com/rs/zerolog/log"
 )
 
 /*********
@@ -81,7 +82,8 @@ func NewBaseLogger(name abstraction.LoggerName) *BaseLogger {
 }
 
 func (sublogger *BaseLogger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
-	panic("TODO!")
+	trace.Panic().Msg("TODO!")
+	return nil, nil
 }
 
 // Function to stop the base logger

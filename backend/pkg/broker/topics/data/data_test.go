@@ -2,6 +2,10 @@ package data_test
 
 import (
 	"encoding/json"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
@@ -9,9 +13,6 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"os"
-	"testing"
-	"time"
 )
 
 func TestDataTopic_Push(t *testing.T) {

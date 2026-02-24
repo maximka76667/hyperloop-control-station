@@ -11,6 +11,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger/file"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
+	trace "github.com/rs/zerolog/log"
 )
 
 const (
@@ -114,7 +115,8 @@ func (sublogger *Logger) createFile(timestamp time.Time) (*file.CSV, error) {
 }
 
 func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
-	panic("TODO!")
+	trace.Panic().Msg("TODO!")
+	return nil, nil
 }
 
 func (sublogger *Logger) Stop() error {

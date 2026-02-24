@@ -8,6 +8,7 @@ import (
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/rs/zerolog"
+	trace "github.com/rs/zerolog/log"
 )
 
 const (
@@ -121,7 +122,7 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 // // PullRecord works as a proxy for the PullRecord method of the subloggers
 func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 
-	panic("PullRecord")
+	trace.Panic().Msg("PullRecord")
 
 	// logger.trace.
 	// 	Trace().
@@ -139,6 +140,7 @@ func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction
 	// 	return nil, ErrLoggerNotFound{request.Name()}
 	// }
 	// return loggerChecked.PullRecord(request)
+	return nil, nil
 }
 
 func (logger *Logger) Stop() error {

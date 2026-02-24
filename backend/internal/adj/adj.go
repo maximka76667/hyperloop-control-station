@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
+	trace "github.com/rs/zerolog/log"
 )
 
 const (
@@ -20,14 +21,14 @@ func getRepoPath() string {
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
 		// This should never happen in practice, but handle it just in case
-		panic(fmt.Sprintf("Failed to get user cache directory: %v", err))
+		trace.Panic().Msg(fmt.Sprintf("Failed to get user cache directory: %v", err))
 	}
 
 	// Use same directory structure as trace files: control-station/adj/
 	adjDir := filepath.Join(cacheDir, "hyperloop-control-station", "adj")
 	absPath, err := filepath.Abs(adjDir)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to resolve ADJ path: %v", err))
+		trace.Panic().Msg(fmt.Sprintf("Failed to resolve ADJ path: %v", err))
 	}
 	return absPath + string(filepath.Separator)
 }

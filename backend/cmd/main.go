@@ -1,9 +1,11 @@
 package main
 
 import (
+	"io"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"syscall"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
@@ -33,9 +35,9 @@ func main() {
 	handleVersionFlag()
 
 	// Configure trace
-	traceFile := initTrace(flags.TraceLevel, flags.TraceFile)
-	if traceFile != nil {
-		defer traceFile.Close()
+	traceCloser := initTrace(flags.TraceLevel, flags.TraceFile)
+	if traceCloser != nil {
+		defer traceCloser.Close()
 	}
 
 	// Set use to all available CPUs and setup CPU profiling if enabled
@@ -138,8 +140,17 @@ func main() {
 
 	// Wait for interrupt signal to gracefully shutdown the backend
 	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM) // syscall.SIGTERM is used to make it work with pnpm interrupt
 	defer signal.Stop(interrupt)
+
+	// Windows graceful shutdown
+	go func() {
+		// io.Copy will block until Stdin is closed (EOF).
+		// On Windows, when Electron calls backendProcess.stdin.end() or exits,
+		// this pipe will close and trigger a graceful shutdown.
+		_, _ = io.Copy(io.Discard, os.Stdin)
+		interrupt <- syscall.SIGTERM
+	}()
 
 	<-interrupt
 	trace.Info().Msg("shutting down backend")

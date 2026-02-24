@@ -19,6 +19,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 )
 
 // Notification is the method invoked by transport to notify of a new event (e.g.packet received)
@@ -31,6 +32,14 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 		err = vehicle.handlePacketNotification(concreteNotification)
 	case transport.ErrorNotification:
 		err = concreteNotification.Err
+
+		// Check if unexpected ID error is present in notified set and skip sending to frontend if it was already notified
+		if unexpectedIDErr, ok := err.(presentation.ErrUnexpectedId); ok {
+			if _, alreadyNotified := vehicle.notifiedUnexpectedIds[unexpectedIDErr.Id]; alreadyNotified {
+				return // Skip sending to frontend if already notified
+			}
+			vehicle.notifiedUnexpectedIds[unexpectedIDErr.Id] = struct{}{}
+		}
 	default:
 		vehicle.trace.Warn().Type("notification", notification).Msg("unexpected notification type")
 		err = ErrUnexpectedNotification{Notification: notification}
